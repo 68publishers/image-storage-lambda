@@ -1,0 +1,18 @@
+# Dev
+node_modules/
+node_modules_production/
+
+config/env-config
+config/aws-config
+
+# Project files etc.
+#nbproject
+.idea
+#.settings
+#.project
+#.buildpath
+
+# MacOS
+#.DS_Store
+#._.DS_Store
+#._*

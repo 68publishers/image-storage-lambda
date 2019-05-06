@@ -1,0 +1,25 @@
+{
+  "name": "68publishers-image-storage-lambda",
+  "author": "68publishers",
+  "main": "index.js",
+  "version": "1.0.0",
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.448.0",
+    "path": "^0.12.7",
+    "sharp": "^0.22.1"
+  },
+  "devDependencies": {
+    "lambda-local": "^1.6.2",
+    "lambda-zipper": "^0.4.1",
+    "minimist": "^1.2.0",
+    "url": "^0.11.0"
+  },
+  "scripts": {
+    "resize": "node dev/resize.js",
+    "build": "npm rebuild sharp --build-from-source && node dev/build-lambda.js"
+  },
+  "engines": {
+    "node": "~8.10.0"
+  }
+}
