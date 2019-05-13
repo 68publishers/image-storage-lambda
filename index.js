@@ -47,7 +47,7 @@ exports.handler = (event, context, callback) => {
                 return Sharp(data.Body)
                     .resize(w, h)
                     .toFormat(getFormat(contentType), {
-                        quality: 100
+                        quality: toInt(Service.getEnv('QUALITY', 100))
                     })
                     .toBuffer()
             })
