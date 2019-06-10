@@ -12,9 +12,7 @@ class Property {
     }
     setValue (value) {
         value = value.toString();
-        if (value === this.defaultValue) {
-            throw `You cannot set same value as default value [${this.defaultValue} === ${value}]`;
-        }
+
         this.value = value;
     }
     getValue (nullIfDefault = false) {

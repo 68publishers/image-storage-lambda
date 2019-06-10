@@ -10,10 +10,10 @@ const service = new Service(process);
 const noImageResolver = new NoImageResolver(service.URL, 'noimage', 'noapp.png');
 const factory = new ModifierFactory(() => {
     return {
-        w: new Property(properties => properties.h.getValue() === null),
         h: new Property(properties => properties.w.getValue() === null),
         pd: new Property(false, '1', service.ALLOWED_PIXEL_DENSITY),
-        pf: new Property(false, '0', new Set(['0', '1']))
+        pf: new Property(false, '0', new Set(['0', '1'])),
+        w: new Property(properties => properties.h.getValue() === null)
     }
 }, service.URL);
 
