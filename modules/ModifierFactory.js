@@ -33,6 +33,7 @@ class ModifierFactory {
         if (modifierString.indexOf(':') !== -1) {
             properties = this.properties();
             let uriModifiers = modifierString.split(',');
+            const definedModifiers = [];
             for (let m in uriModifiers) {
                 m = uriModifiers[m].split(':');
                 if (!(m[0] in properties)) {
@@ -41,6 +42,7 @@ class ModifierFactory {
                 tryCatch(m[0], () => {
                     properties[m[0]].setValue(m[1])
                 });
+                definedModifiers.push(m[0]);
             }
 
             let parts = [];
@@ -53,8 +55,8 @@ class ModifierFactory {
                     tryCatch(key, () => {
                         property.validate(properties)
                     });
-                    urlValue = property.getValue(true);
-                    if (null !== urlValue) {
+                    urlValue = property.getValue();
+                    if (null !== urlValue && definedModifiers.includes(key)) {
                         parts.push(key + ':' + urlValue)
                     }
                 }

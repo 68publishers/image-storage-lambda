@@ -6,8 +6,7 @@ class Property {
             throw 'Invalid argument error: 3. argument passed to Property::constructor must be NULL or instance of Set';
         }
         this.required = required;
-        this.defaultValue = null === defaultValue ? null : defaultValue.toString();
-        this.value = this.defaultValue;
+        this.value = defaultValue;
         this.allowedSet = allowedSet instanceof Set && allowedSet.size === 0 ? null : allowedSet;
     }
     setValue (value) {
@@ -15,10 +14,8 @@ class Property {
 
         this.value = value;
     }
-    getValue (nullIfDefault = false) {
-        return nullIfDefault && this.value === this.defaultValue
-            ? null
-            : this.value;
+    getValue () {
+        return this.value;
     }
     validate (properties = {}) {
         let value = this.getValue();
