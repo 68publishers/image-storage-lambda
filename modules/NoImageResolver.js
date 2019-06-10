@@ -24,7 +24,7 @@ class NoImageResolver {
         for (let key in this.noimages) {
             let args = this.noimages[key];
             if (true === args[2](modifier)) {
-                return `${args[0]}/${modifier.getModifier()}/${args[1]}`;
+                return `${this.baseUrl}/${args[0]}/${modifier.getModifier()}/${args[1]}`;
             }
         }
 
