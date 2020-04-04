@@ -12,7 +12,7 @@
   "devDependencies": {
     "lambda-local": "^1.6.2",
     "lambda-zipper": "^0.4.1",
-    "minimist": "^1.2.0",
+    "minimist": "^1.2.3",
     "url": "^0.11.0"
   },
   "scripts": {
