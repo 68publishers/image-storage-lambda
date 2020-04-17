@@ -46,14 +46,14 @@ Parameters:
     Type: Number
     Default: 90
     Description: "An encode quality for cached images."
-  SourceBucketPostfix:
+  SourceBucketName:
     Type: String
-    Default: "source"
-    Description: "A postfix for the Source Bucket's name. Final Bucket's name is in format {stack name}-{postfix}."
-  CacheBucketPostfix:
+    Default: "image-storage-source"
+    Description: "An unique Source Bucket's name."
+  CacheBucketName:
     Type: String
-    Default: "cache"
-    Description: "A postfix for the Cache Bucket's name. Final Bucket's name is in format {stack name}-{postfix}."
+    Default: "image-storage-cache"
+    Description: "An unique Cache Bucket's name."
   NoImages:
     Type: CommaDelimitedList
     Default: ""
@@ -132,8 +132,8 @@ Resources:
             - ','
             - !Ref AllowedQualities
           ENCODE_QUALITY: !Ref EncodeQuality
-          SOURCE_BUCKET: !Sub "${AWS::StackName}-${SourceBucketPostfix}"
-          CACHE_BUCKET: !Sub "${AWS::StackName}-${CacheBucketPostfix}"
+          SOURCE_BUCKET: !Ref SourceBucketName
+          CACHE_BUCKET: !Ref CacheBucketName
           NO_IMAGES: !Join
             - ','
             - !Ref NoImages
@@ -145,7 +145,7 @@ Resources:
   SourceBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub "${AWS::StackName}-${SourceBucketPostfix}"
+      BucketName: !Ref SourceBucketName
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
@@ -155,7 +155,7 @@ Resources:
   CacheBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub "${AWS::StackName}-${CacheBucketPostfix}"
+      BucketName: !Ref CacheBucketName
       WebsiteConfiguration:
         IndexDocument: index.html
         RoutingRules:
@@ -173,7 +173,7 @@ Resources:
     Type: AWS::S3::BucketPolicy
     DependsOn: CacheBucket
     Properties:
-      Bucket: !Sub "${AWS::StackName}-${CacheBucketPostfix}"
+      Bucket: !Ref CacheBucketName
       PolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -182,7 +182,7 @@ Resources:
             Effect: Allow
             Principal: "*"
             Action: s3:GetObject
-            Resource: !Sub "arn:aws:s3:::${AWS::StackName}-${CacheBucketPostfix}/*"
+            Resource: !Sub "arn:aws:s3:::${CacheBucketName}/*"
 
   # CloudFront
   CacheBucketDistribution:
@@ -203,7 +203,7 @@ Resources:
           DefaultTTL: 0
           MaxTTL: 31536000
           MinTTL: 0
-          TargetOriginId: !Sub "S3-${AWS::StackName}-${CacheBucketPostfix}-id"
+          TargetOriginId: !Sub "S3-${AWS::StackName}-${CacheBucketName}-id"
           ViewerProtocolPolicy: "https-only"
         Enabled: true
         HttpVersion: http2
@@ -213,8 +213,8 @@ Resources:
           MinimumProtocolVersion: "TLSv1"
         Origins:
           -
-            Id: !Sub "S3-${AWS::StackName}-${CacheBucketPostfix}-id"
-            DomainName: !Sub "${AWS::StackName}-${CacheBucketPostfix}.s3-website.${AWS::Region}.amazonaws.com"
+            Id: !Sub "S3-${AWS::StackName}-${CacheBucketName}-id"
+            DomainName: !Sub "${CacheBucketName}.s3-website.${AWS::Region}.amazonaws.com"
             CustomOriginConfig:
               HTTPPort: 80
               HTTPSPort: 443
