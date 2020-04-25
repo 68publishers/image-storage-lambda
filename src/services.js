@@ -60,6 +60,7 @@ services.ModifierFacade = {
             new (require('./modifier/original'))(),
             new (require('./modifier/height'))(),
             new (require('./modifier/width'))(),
+            new (require('./modifier/aspect-ratio'))(),
             new (require('./modifier/pixel-density'))(),
             new (require('./modifier/orientation'))(),
             new (require('./modifier/quality'))(),
