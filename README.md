@@ -142,8 +142,10 @@ or example if you define `user::^userAvatar\/` and a path of a requested image w
 | Height | h | Integer | Can be restricted by parameter `AllowedResolutions` |
 | Width | w | Integer | Can be restricted by parameter `AllowedResolutions` |
 | Pixel density | pd | Integer\|Float | Can be restricted by parameter `AllowedPixelDensity` |
-| Quality | q | Integer | Can be restricted by parameter `AllowedQualities` |
+| Aspect ratio | ar | String | Required format is `{Int\|Float}x{Int\|Float}` and a height or a width (not both) must be also defined. For example `w:200,ar:1x2` is an equivalent of `w:200,h:400` |
+| Fit | f | String | See [supported fits](#supported-fits) for the list of supported values |
 | Orientation | o | Integer\|String | Allowed values are `auto, 0, 90, -90, 180, -180, 270, -270` |
+| Quality | q | Integer | Can be restricted by parameter `AllowedQualities` |
 
 #### Image types
 
@@ -152,6 +154,22 @@ or example if you define `user::^userAvatar\/` and a path of a requested image w
 - PNG - `.png`
 - GIF - `.gif`
 - WEBP - `.webp`
+
+#### Supported fits
+
+- `contain` - Preserving aspect ratio, resize the image to be as large as possible while ensuring its dimensions are less than or equal to both those specified.
+- `stretch` - Ignore the aspect ratio of the input and stretch to both provided dimensions.
+- `fill` - Preserving aspect ratio, contain within both provided dimensions using "letterboxing" where necessary.
+- `crop-*` - Preserving aspect ratio, ensure the image covers both provided dimensions by cropping to fit.
+    - `crop-center`
+    - `crop-left`
+    - `crop-right`
+    - `crop-top`
+    - `crop-top-left`
+    - `crop-top-right`
+    - `crop-bottom`
+    - `crop-bottom-left`
+    - `crop-bottom-right`
 
 ## Usage
 
