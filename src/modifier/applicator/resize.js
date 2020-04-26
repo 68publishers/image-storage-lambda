@@ -1,11 +1,13 @@
 'use strict';
 
+const Fit = require('../fit');
 const InvalidStateError = require('../../error/invalid-state-error');
 
 class Resize extends require('./abstract-applicator') {
     async apply(image, info, values) {
         const pd = parseFloat(values.getOptional('PixelDensity', 1));
         const aspectRatio = values.getOptional('AspectRatio');
+        const fit = values.getOptional('Fit', 'crop-center');
 
         let width = values.getOptional('Width');
         let height = values.getOptional('Height');
@@ -35,10 +37,7 @@ class Resize extends require('./abstract-applicator') {
         width = parseInt(null !== width ? width * pd : width);
         height = parseInt(null !== height ? height * pd : height);
 
-        return image.resize(width, height, {
-            fit: 'cover',
-            position: 'centre'
-        });
+        return image.resize(width, height, Fit.resolveSharpOptions(fit));
     }
 }
 
