@@ -29,9 +29,9 @@ class Resize extends require('./abstract-applicator') {
             width = imageWidth;
             height = imageHeight;
         } else if (null === width) {
-            width = height * ((null !== aspectRatio.w ? aspectRatio.w : imageWidth) / (null !== aspectRatio.h ? aspectRatio.h : imageHeight));
+            width = height * ((null !== aspectRatio ? aspectRatio.w : imageWidth) / (null !== aspectRatio ? aspectRatio.h : imageHeight));
         } else if (null === height) {
-            height = width / ((null !== aspectRatio.w ? aspectRatio.w : imageWidth) / (null !== aspectRatio.h ? aspectRatio.h : imageHeight));
+            height = width / ((null !== aspectRatio ? aspectRatio.w : imageWidth) / (null !== aspectRatio ? aspectRatio.h : imageHeight));
         }
 
         width = parseInt(null !== width ? width * pd : width);
