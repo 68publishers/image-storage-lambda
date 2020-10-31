@@ -48,6 +48,13 @@ Default: `:`
 An assigner for modifier definitions in a path. 
 For example if you set this parameter as `=` then a modifier string in a path will look like this: `w=100,o=auto`.
 
+#### VersionParameterName
+Type: String
+
+Default: `_v`
+
+A query parameter's name used for a document's version (just for a cache).
+
 #### SignatureParameterName
 Type: String
 
@@ -115,6 +122,13 @@ Type: String
 Default: `image-storage-cache`
 
 A unique Cache Bucket's name.
+
+#### CacheMaxAge
+Type: Number
+
+Default: `31536000`
+
+The maximum cache age in seconds. The value is used for HTTP headers Cache-Control and Expires.
 
 #### NoImages
 Type: CommaDelimitedList
