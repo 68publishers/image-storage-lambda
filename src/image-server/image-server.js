@@ -61,13 +61,16 @@ class ImageServer {
             await resource.modifyImage(modifiers);
 
             const buffer = await resource.image.toBuffer();
+            const now = new Date();
 
             return await this._s3.putObject({
                 Bucket: this._config.CACHE_BUCKET,
                 Body: buffer,
                 ContentType: SupportedType.getTypeByExtension(resource.info.extension),
                 Key: this._createCachedPath(resource.info, modifierString),
-                ACL: 'public-read'
+                ACL: 'private',
+                CacheControl: `public, max-age=${this._config.CACHE_MAX_AGE.toString()}`,
+                Expires: new Date(now.getTime() + (this._config.CACHE_MAX_AGE * 1000))
             }).promise().then(
                 () => this._responseFactory.createRedirectResponse(this._createLink(resource.info, modifierString)),
                 e => {

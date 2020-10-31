@@ -18,6 +18,10 @@ Parameters:
     Type: String
     Default: ":"
     Description: "An assigner for modifier definitions in a path. For example if you set this parameter as \"=\" then a modifier string in a path will look like this: \"w=100,o=auto\"."
+  VersionParameterName:
+    Type: String
+    Default: _v
+    Description: "A query parameter's name used for a document's version (just for a cache)."
   SignatureParameterName:
     Type: String
     Default: _s
@@ -54,6 +58,10 @@ Parameters:
     Type: String
     Default: "image-storage-cache"
     Description: "An unique Cache Bucket's name."
+  CacheMaxAge:
+    Type: Number
+    Default: 31536000
+    Description: "The maximum cache age in seconds. The value is used for HTTP headers Cache-Control and Expires"
   NoImages:
     Type: CommaDelimitedList
     Default: ""
@@ -80,7 +88,7 @@ Resources:
       MaxSessionDuration: 3600
       Policies:
         -
-          PolicyName: basic-execution-policy
+          PolicyName: !Sub "S3-${AWS::StackName}-GetImageResponseRole-cache-policy"
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -92,7 +100,7 @@ Resources:
                   - logs:PutLogEvents
                 Resource: arn:aws:logs:*:*:*
               -
-                Effect: Allow # todo: remove grant access to everything
+                Effect: Allow
                 Action: "s3:*"
                 Resource: "*"
 
@@ -134,6 +142,7 @@ Resources:
           ENCODE_QUALITY: !Ref EncodeQuality
           SOURCE_BUCKET: !Ref SourceBucketName
           CACHE_BUCKET: !Ref CacheBucketName
+          CACHE_MAX_AGE: !Ref CacheMaxAge
           NO_IMAGES: !Join
             - ','
             - !Ref NoImages
@@ -146,6 +155,7 @@ Resources:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Ref SourceBucketName
+      AccessControl: Private
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
@@ -156,6 +166,7 @@ Resources:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Ref CacheBucketName
+      AccessControl: Private
       WebsiteConfiguration:
         IndexDocument: index.html
         RoutingRules:
@@ -171,7 +182,6 @@ Resources:
 
   CacheBucketPolicy:
     Type: AWS::S3::BucketPolicy
-    DependsOn: CacheBucket
     Properties:
       Bucket: !Ref CacheBucketName
       PolicyDocument:
@@ -182,7 +192,7 @@ Resources:
             Effect: Allow
             Principal: "*"
             Action: s3:GetObject
-            Resource: !Sub "arn:aws:s3:::${CacheBucketName}/*"
+            Resource: !Sub "${CacheBucket.Arn}/*"
 
   # CloudFront
   CacheBucketDistribution:
@@ -193,17 +203,13 @@ Resources:
           AllowedMethods:
             - HEAD
             - GET
+            - OPTIONS
           CachedMethods:
             - HEAD
             - GET
-          ForwardedValues:
-            QueryString: true
-            Cookies:
-              Forward: "none"
-          DefaultTTL: 0
-          MaxTTL: 31536000
-          MinTTL: 0
+            - OPTIONS
           TargetOriginId: !Sub "S3-${AWS::StackName}-${CacheBucketName}-id"
+          CachePolicyId: !Ref CloudFrontCachePolicy
           ViewerProtocolPolicy: "https-only"
         Enabled: true
         HttpVersion: http2
@@ -215,6 +221,8 @@ Resources:
           -
             Id: !Sub "S3-${AWS::StackName}-${CacheBucketName}-id"
             DomainName: !Sub "${CacheBucketName}.s3-website.${AWS::Region}.amazonaws.com"
+            ConnectionAttempts: 3
+            ConnectionTimeout: 10
             CustomOriginConfig:
               HTTPPort: 80
               HTTPSPort: 443
@@ -225,6 +233,31 @@ Resources:
                 - TLSv1
                 - TLSv1.1
                 - TLSv1.2
+
+  CloudFrontCachePolicy:
+    Type: AWS::CloudFront::CachePolicy
+    Properties:
+      CachePolicyConfig:
+        Name: !Sub "S3-${AWS::StackName}-${CacheBucketName}-cloudfront-cache-policy"
+        DefaultTTL: 0
+        MaxTTL: 31536000 # one year
+        MinTTL: 0
+        ParametersInCacheKeyAndForwardedToOrigin:
+          EnableAcceptEncodingGzip: false
+          CookiesConfig:
+            CookieBehavior: "none"
+          QueryStringsConfig:
+            QueryStringBehavior: "whitelist"
+            QueryStrings:
+              - !Ref VersionParameterName
+              - !Ref SignatureParameterName
+          HeadersConfig:
+            HeaderBehavior: "whitelist"
+            Headers:
+              - Content-Type
+              - Origin
+              - Access-Control-Request-Headers
+              - Access-Control-Request-Method
 
 Outputs:
   GetImageResponseApi:
