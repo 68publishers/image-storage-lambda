@@ -16,6 +16,7 @@ class Config {
             ALLOWED_RESOLUTIONS: '',
             ALLOWED_QUALITIES: '',
             ENCODE_QUALITY: 90,
+            CACHE_MAX_AGE: 31536000,
 
             NO_IMAGES: '',
             NO_IMAGE_PATTERNS: '',
