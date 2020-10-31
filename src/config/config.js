@@ -9,6 +9,7 @@ class Config {
             HOST: null,
             MODIFIER_SEPARATOR: ',',
             MODIFIER_ASSIGNER: ':',
+            VERSION_PARAMETER_NAME: '_v',
             SIGNATURE_PARAMETER_NAME: '_s',
             SIGNATURE_KEY: null,
             SIGNATURE_ALGORITHM: 'sha256',

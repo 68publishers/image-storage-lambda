@@ -34,7 +34,9 @@ class ImageServer {
         }
 
         // validate signature token
-        this._signatureStrategy.verifyToken(request.hasQuery(this._config.SIGNATURE_PARAMETER_NAME) ? request.getQuery(this._config.SIGNATURE_PARAMETER_NAME) : null, path);
+        const signatureToken = request.hasQuery(this._config.SIGNATURE_PARAMETER_NAME) ? request.getQuery(this._config.SIGNATURE_PARAMETER_NAME) : null;
+
+        this._signatureStrategy.verifyToken(signatureToken, path);
 
         // parse image info & modifiers
         const parts = path.split('/');
@@ -48,6 +50,10 @@ class ImageServer {
         parts.splice(pathCount - 2, 1);
 
         const info = new ImageInfo(parts.join('/'));
+
+        if (request.hasQuery(this._config.VERSION_PARAMETER_NAME)) {
+            info.version = request.getQuery(this._config.VERSION_PARAMETER_NAME);
+        }
 
         if (null === info.extension) {
             throw new InvalidStateError('Missing file extension in requested path.');
@@ -72,7 +78,7 @@ class ImageServer {
                 CacheControl: `public, max-age=${this._config.CACHE_MAX_AGE.toString()}`,
                 Expires: new Date(now.getTime() + (this._config.CACHE_MAX_AGE * 1000))
             }).promise().then(
-                () => this._responseFactory.createRedirectResponse(this._createLink(resource.info, modifierString)),
+                () => this._responseFactory.createRedirectResponse(this._createLink(resource.info, modifierString, signatureToken)),
                 e => {
                     throw new InvalidStateError(e.message);
                 }
@@ -96,15 +102,39 @@ class ImageServer {
         return `${basePath}${info.createCachedPath(modifierString)}`;
     }
 
-    _createLink(info, modifierString, addSignature = false) {
-        const host = null !== this._config.HOST ? this._config.HOST : `https://${this._config.CACHE_BUCKET}.s3.${this._s3.config.region}.amazonaws.com`;
-        let path = this._createCachedPath(info, modifierString);
+    _getHostUrl() {
+        return new URL(
+            null !== this._config.HOST ? this._config.HOST : `https://${this._config.CACHE_BUCKET}.s3.${this._s3.config.region}.amazonaws.com`
+        );
+    }
 
-        if (addSignature) {
-            path += `?${this._config.SIGNATURE_PARAMETER_NAME}=${this._signatureStrategy.createToken(path)}`;
+    _createLink(info, modifierString, signatureToken = null) {
+        const url = this._getHostUrl();
+        url.pathname = this._createCachedPath(info, modifierString);
+
+        if (null !== signatureToken) {
+            url.searchParams.set(this._config.SIGNATURE_PARAMETER_NAME, signatureToken);
         }
 
-        return `${host}/${path}`;
+        if (null !== info.version) {
+            url.searchParams.set(this._config.SIGNATURE_PARAMETER_NAME, info.version);
+        }
+
+        return url.toString();
+    }
+
+    _createNoImageLink(info, modifierString) {
+        const url = this._getHostUrl();
+        const path = this._createCachedPath(info, modifierString);
+        const signatureToken = this._signatureStrategy.createToken(path);
+
+        url.pathname = path;
+
+        if (null !== signatureToken) {
+            url.searchParams.set(this._config.SIGNATURE_PARAMETER_NAME, signatureToken);
+        }
+
+        return url.toString();
     }
 
     _getNoImageResponse(info, modifierString) {
@@ -114,7 +144,7 @@ class ImageServer {
             noImageInfo.extension = info.extension;
 
             return this._responseFactory.createRedirectResponse(
-                this._createLink(noImageInfo, modifierString, true)
+                this._createNoImageLink(noImageInfo, modifierString)
             );
         } catch (e) {
             return null;

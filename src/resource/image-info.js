@@ -11,6 +11,7 @@ class ImageInfo {
         this._name = name.join('.');
         this._namespace = namespace.join('/');
         this._extension = extension;
+        this._version = null;
     }
 
     get name() {
@@ -27,6 +28,14 @@ class ImageInfo {
 
     set extension(extension) {
         this._extension = extension;
+    }
+
+    get version() {
+        return this._version;
+    }
+
+    set version(version) {
+        this._version = version;
     }
 
     createCachedPath(modifier) {
