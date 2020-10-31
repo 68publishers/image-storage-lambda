@@ -127,6 +127,7 @@ Resources:
           BASE_PATH: !Ref BasePath
           MODIFIER_SEPARATOR: !Ref ModifierSeparator
           MODIFIER_ASSIGNER: !Ref ModifierAssigner
+          VERSION_PARAMETER_NAME: !Ref VersionParameterName
           SIGNATURE_PARAMETER_NAME: !Ref SignatureParameterName
           SIGNATURE_KEY: !Ref SignatureKey
           SIGNATURE_ALGORITHM: !Ref SignatureAlgorithm
