@@ -8,7 +8,6 @@ But the application can be used standalone without `image-storage` of course.
 ## Requirements
 
 - docker
-- npm
 - AWS SAM CLI
 
 Please follow an official Amazon documentation if you don't have the AWS SAM CLI installed already:
@@ -19,8 +18,8 @@ Please follow an official Amazon documentation if you don't have the AWS SAM CLI
 ## Build and Deploy
 
 ```bash
-$ sam build
-$ sam deploy --guided
+$ make build
+$ make deploy.guided
 ```
 
 ## Application parameters
@@ -150,24 +149,25 @@ or example if you define `user::^userAvatar\/` and a path of a requested image w
 
 #### Modifiers
 
-| Name | Shortcut | Type | Note | 
-| --- | --- | --- | --- |
-| Original | original | - | A modifier without a value, use it if you want to return the original image |
-| Height | h | Integer | Can be restricted by parameter `AllowedResolutions` |
-| Width | w | Integer | Can be restricted by parameter `AllowedResolutions` |
-| Pixel density | pd | Integer\|Float | Can be restricted by parameter `AllowedPixelDensity` |
-| Aspect ratio | ar | String | Required format is `{Int\|Float}x{Int\|Float}` and a height or a width (not both) must be also defined. For example `w:200,ar:1x2` is an equivalent of `w:200,h:400` |
-| Fit | f | String | See [supported fits](#supported-fits) for the list of supported values |
-| Orientation | o | Integer\|String | Allowed values are `auto, 0, 90, -90, 180, -180, 270, -270` |
-| Quality | q | Integer | Can be restricted by parameter `AllowedQualities` |
+| Name          | Shortcut | Type            | Note                                                                                                                                                                 | 
+|---------------|----------|-----------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Original      | original | -               | A modifier without a value, use it if you want to return the original image                                                                                          |
+| Height        | h        | Integer         | Can be restricted by parameter `AllowedResolutions`                                                                                                                  |
+| Width         | w        | Integer         | Can be restricted by parameter `AllowedResolutions`                                                                                                                  |
+| Pixel density | pd       | Integer\|Float  | Can be restricted by parameter `AllowedPixelDensity`                                                                                                                 |
+| Aspect ratio  | ar       | String          | Required format is `{Int\|Float}x{Int\|Float}` and a height or a width (not both) must be also defined. For example `w:200,ar:1x2` is an equivalent of `w:200,h:400` |
+| Fit           | f        | String          | See [supported fits](#supported-fits) for the list of supported values                                                                                               |
+| Orientation   | o        | Integer\|String | Allowed values are `auto, 0, 90, -90, 180, -180, 270, -270`                                                                                                          |
+| Quality       | q        | Integer         | Can be restricted by parameter `AllowedQualities`                                                                                                                    |
 
 #### Image types
 
 - JPEG - `.jpeg` or `.jpg`
 - Progressive JPEG - `.pjpg`
 - PNG - `.png`
-- GIF - `.gif`
-- WEBP - `.webp`
+- GIF - `.gif` (animations support)
+- WEBP - `.webp` (animations support)
+- AVIF - '.avif'
 
 #### Supported fits
 
@@ -189,7 +189,7 @@ or example if you define `user::^userAvatar\/` and a path of a requested image w
 
 Generated images are cached in a Cache Bucket. A name of the Cache Bucket that is defined by parameter `CacheBucketName`. 
 If some image is requested and the Cache Bucket contains it then the image is returned directly. 
-Otherwise a Lambda function is called and it will try to access the image through the Source Bucket (a name is defined by parameter `SourceBucketName`), modify it and save it to the Cache Bucket.
+Otherwise, a Lambda function is called, and it will try to access the image through the Source Bucket (a name defined by parameter `SourceBucketName`), modify it and save it to the Cache Bucket.
 The Lambda function can return an error 404 or a `no-image` image if some is provided by you.
 
 #### What is the URL of my API?
